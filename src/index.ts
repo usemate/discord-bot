@@ -12,50 +12,54 @@ if (typeof process.env.TOKEN !== 'string') {
 
 const getStatsEmbed = async () => {
   const stats = await getStats()
+
   const statsEmbed = new MessageEmbed()
     .setColor('#81cb53')
-    .setImage('https://i.imgur.com/WApNoC5.png')
-    .setTitle('🧉🧉🧉🧉🧉')
+    .setTitle('$MATE (24h)')
     .addFields(
       {
-        name: '\u200B',
-        value: '*** $MATE (24h) ***',
-      },
-      {
-        name: '🏷 Price',
+        name: '🏷 **Price**',
         value: stats.price.value + getHighlighted(stats.price.oneDayDiff),
       },
       {
-        name: '💵 MarketCap',
+        name: '💵 **MarketCap**',
         value:
           stats.marketCap.value + getHighlighted(stats.marketCap.oneDayDiff),
-      },
+      }
+    )
+    .setImage(
+      'https://raw.githubusercontent.com/usemate/discord-bot/master/assets/transparent.png'
+    )
+
+  const ordersEmbed = new MessageEmbed()
+    .setColor('#81cb53')
+    .setTitle('Limit orders (24h)')
+    .addFields(
       {
-        name: '\u200B',
-        value: '*** Limit orders (24h) ***',
-      },
-      {
-        name: '🗃 Total Orders',
+        name: '🗃 **Total Orders**',
         value:
           stats.totalOrders.value +
           getHighlighted(stats.totalOrders.oneDayDiff),
       },
       {
-        name: '☑️ Filled Orders',
+        name: '☑️ **Filled Orders**',
         value:
           stats.filledOrders.value +
           getHighlighted(stats.filledOrders.oneDayDiff),
       },
       {
-        name: '👥 Unique Users',
+        name: '👥 **Unique Users**',
         value:
           stats.uniqueUsers.value +
           getHighlighted(stats.uniqueUsers.oneDayDiff),
       },
-      { name: '💰 Total Locked', value: stats.totalLocked.value }
+      { name: '💰 **Total Locked**', value: stats.totalLocked.value }
+    )
+    .setImage(
+      'https://raw.githubusercontent.com/usemate/discord-bot/master/assets/banner.png'
     )
 
-  return statsEmbed
+  return [statsEmbed, ordersEmbed]
 }
 const getHighlighted = (value = '') => ' `' + value + '`'
 
@@ -69,8 +73,8 @@ const start = async () => {
     if (commandName === 'stats') {
       try {
         await interaction.deferReply()
-        const statsEmbed = await getStatsEmbed()
-        await interaction.editReply({ embeds: [statsEmbed] })
+        const embeds = await getStatsEmbed()
+        await interaction.editReply({ embeds })
       } catch (e) {
         console.error(e)
       }
@@ -85,8 +89,9 @@ const start = async () => {
         async () => {
           console.log('Cron job triggered')
           if (channel) {
-            const statsEmbed = await getStatsEmbed()
-            ;(channel as any).send({ embeds: [statsEmbed] })
+            const embeds = await getStatsEmbed()
+
+            ;(channel as any).send({ embeds })
           }
         },
         null,
