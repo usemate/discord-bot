@@ -15,8 +15,12 @@ const getStatsEmbed = async () => {
   const statsEmbed = new MessageEmbed()
     .setColor('#81cb53')
     .setImage('https://i.imgur.com/WApNoC5.png')
-    .setTitle('$MATE (24h)')
+    .setTitle('🧉🧉🧉🧉🧉')
     .addFields(
+      {
+        name: '\u200B',
+        value: '*** $MATE (24h) ***',
+      },
       {
         name: '🏷 Price',
         value: stats.price.value + getHighlighted(stats.price.oneDayDiff),
