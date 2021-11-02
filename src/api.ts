@@ -89,6 +89,8 @@ type Stats = {
   totalOrders: Stat
   filledOrders: Stat
   uniqueUsers: Stat
+  amountIn: Stat
+  recievedAmount: Stat
 }
 
 type Order = any
@@ -100,9 +102,10 @@ const getBigNumber = (value: string) =>
   })
 
 export const getStats = async (): Promise<Stats> => {
-  const [coinData, mateData] = await Promise.all([
+  const [coinData, mateData, orderStatsData] = await Promise.all([
     ApiCache.request('https://api.coingecko.com/api/v3/coins/mate'),
     ApiCache.request('https://usemate.com/api/v1/stats'),
+    ApiCache.request('https://usemate.com/api/order-api/stats'),
   ])
 
   const marketCap = {
@@ -125,7 +128,7 @@ export const getStats = async (): Promise<Stats> => {
   }
 
   const totalLocked = {
-    value: '$' + getBigNumber(mateData.totalLocked),
+    value: '$' + getBigNumber(orderStatsData.totalLocked),
   }
 
   let done = false
@@ -192,6 +195,14 @@ export const getStats = async (): Promise<Stats> => {
     oneDayDiff: '+' + getUsersCount(totalOrders24H).toString(),
   }
 
+  const amountIn = {
+    value: '$' + getBigNumber(orderStatsData.executed.amountIn),
+  }
+
+  const recievedAmount = {
+    value: '$' + getBigNumber(orderStatsData.executed.recievedAmount),
+  }
+
   return {
     marketCap,
     price,
@@ -199,5 +210,7 @@ export const getStats = async (): Promise<Stats> => {
     uniqueUsers,
     filledOrders,
     totalOrders,
+    recievedAmount,
+    amountIn,
   }
 }

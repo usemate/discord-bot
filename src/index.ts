@@ -53,7 +53,9 @@ const getStatsEmbed = async () => {
           stats.uniqueUsers.value +
           getHighlighted(stats.uniqueUsers.oneDayDiff),
       },
-      { name: '💰 **Total Locked**', value: stats.totalLocked.value }
+      { name: '💰 **Total Locked**', value: stats.totalLocked.value },
+      { name: '➡ **Amount in**', value: stats.amountIn.value },
+      { name: '⬅️ **Amount recieved**', value: stats.recievedAmount.value }
     )
     .setImage(
       'https://raw.githubusercontent.com/usemate/discord-bot/master/assets/banner.png'
