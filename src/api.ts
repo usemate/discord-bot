@@ -210,9 +210,9 @@ export const getStats = async (): Promise<Stats> => {
 
   const getUsersCount = (items: Order[]) =>
     [...new Set(items.map((item) => item.creator.toLowerCase()))].length
-  const oneDayAgo = moment().subtract(1, 'day')
   const getOrdersLast24Hour = (field: string) => (order: Order) =>
-    order[field] && (order[field] as Moment).isAfter(oneDayAgo)
+    order[field] &&
+    (order[field] as Moment).isAfter(moment().subtract(1, 'day'))
 
   const filledOrders = {
     value: executedOrders.length.toString(),
