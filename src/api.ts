@@ -93,6 +93,46 @@ type Stats = {
   recievedAmount: Stat
 }
 
+type CachedData = {
+  key: string
+  date: Moment
+  value: any
+}
+
+const cachedData: CachedData[] = []
+
+const getCachedPercentage24h = (
+  key: string,
+  value: string
+): string | undefined => {
+  const nowDate = moment().startOf('hour').subtract(1, 'day').unix()
+  const match = cachedData
+    .filter((d) => d.key === key)
+    .find((data) => data.date.unix() === nowDate)
+
+  if (match) {
+    const cachedValue = new Decimal(match.value)
+    const currentValue = new Decimal(value)
+
+    const result = currentValue
+      .sub(cachedValue)
+      .div(currentValue)
+      .mul(100)
+      .toDecimalPlaces(2)
+
+    const prefix = result.gte(0) ? '+' : ''
+    return `${prefix}${result.toString()}%`
+  }
+}
+
+const setCachedData = (key: string, value: any) => {
+  cachedData.push({
+    key,
+    value: new Decimal(value).toString(),
+    date: moment().startOf('hour'),
+  })
+}
+
 type Order = any
 
 const getPrefix = (value: number) => (value > 0 ? '+' : '')
@@ -125,10 +165,6 @@ export const getStats = async (): Promise<Stats> => {
         coinData.market_data.price_change_percentage_24h
       ).toDecimalPlaces(2) +
       '%',
-  }
-
-  const totalLocked = {
-    value: '$' + getBigNumber(orderStatsData.totalLocked),
   }
 
   let done = false
@@ -195,12 +231,40 @@ export const getStats = async (): Promise<Stats> => {
     oneDayDiff: '+' + getUsersCount(totalOrders24H).toString(),
   }
 
+  if (orderStatsData.executed.amountIn) {
+    setCachedData('amountIn', orderStatsData.executed.amountIn)
+  }
+
+  if (orderStatsData.executed.recievedAmount) {
+    setCachedData('recievedAmount', orderStatsData.executed.recievedAmount)
+  }
+
+  if (orderStatsData.totalLocked) {
+    setCachedData('totalLocked', orderStatsData.totalLocked)
+  }
+
+  const totalLocked = {
+    value: '$' + getBigNumber(orderStatsData.totalLocked),
+    oneDayDiff: getCachedPercentage24h(
+      'totalLocked',
+      orderStatsData.totalLocked
+    ),
+  }
+
   const amountIn = {
     value: '$' + getBigNumber(orderStatsData.executed.amountIn),
+    oneDayDiff: getCachedPercentage24h(
+      'amountIn',
+      orderStatsData.executed.amountIn
+    ),
   }
 
   const recievedAmount = {
     value: '$' + getBigNumber(orderStatsData.executed.recievedAmount),
+    oneDayDiff: getCachedPercentage24h(
+      'recievedAmount',
+      orderStatsData.executed.recievedAmount
+    ),
   }
 
   return {

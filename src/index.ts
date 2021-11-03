@@ -53,9 +53,22 @@ const getStatsEmbed = async () => {
           stats.uniqueUsers.value +
           getHighlighted(stats.uniqueUsers.oneDayDiff),
       },
-      { name: '💰 **Total Locked**', value: stats.totalLocked.value },
-      { name: '➡ **Amount in**', value: stats.amountIn.value },
-      { name: '⬅️ **Amount received**', value: stats.recievedAmount.value }
+      {
+        name: '💰 **Total Locked**',
+        value:
+          stats.totalLocked.value +
+          getHighlighted(stats.totalLocked.oneDayDiff),
+      },
+      {
+        name: '➡ **Amount in**',
+        value: stats.amountIn.value + getHighlighted(stats.amountIn.oneDayDiff),
+      },
+      {
+        name: '⬅️ **Amount received**',
+        value:
+          stats.recievedAmount.value +
+          getHighlighted(stats.recievedAmount.oneDayDiff),
+      }
     )
     .setImage(
       'https://raw.githubusercontent.com/usemate/discord-bot/master/assets/banner.png'
@@ -63,7 +76,7 @@ const getStatsEmbed = async () => {
 
   return [statsEmbed, ordersEmbed]
 }
-const getHighlighted = (value = '') => ' `' + value + '`'
+const getHighlighted = (value = '') => (value ? ' `' + value + '`' : '')
 
 const start = async () => {
   const client = await getClient()
@@ -87,7 +100,7 @@ const start = async () => {
     if (typeof process.env.CRON_CHANNEL === 'string') {
       const channel = await client.channels.cache.get(process.env.CRON_CHANNEL)
       const job = new CronJob(
-        '0 12 * * *',
+        '0 * * * *',
         async () => {
           console.log('Cron job triggered')
           if (channel) {
