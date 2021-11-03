@@ -100,7 +100,7 @@ const start = async () => {
     if (typeof process.env.CRON_CHANNEL === 'string') {
       const channel = await client.channels.cache.get(process.env.CRON_CHANNEL)
       const job = new CronJob(
-        '0 * * * *',
+        '0 12 * * *',
         async () => {
           console.log('Cron job triggered')
           if (channel) {
