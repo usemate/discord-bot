@@ -226,9 +226,16 @@ export const getStats = async (): Promise<Stats> => {
     oneDayDiff: '+' + totalOrders24H.length,
   }
 
+  const ordersBefore24h = orders.filter((order) =>
+    order.created.isBefore(moment().subtract(1, 'day'))
+  )
+
+  const currentUsers = getUsersCount(orders)
+  const prev24Users = getUsersCount(ordersBefore24h)
+
   const uniqueUsers = {
-    value: getUsersCount(orders).toString(),
-    oneDayDiff: '+' + getUsersCount(totalOrders24H).toString(),
+    value: currentUsers.toString(),
+    oneDayDiff: '+' + (currentUsers - prev24Users).toString(),
   }
 
   if (orderStatsData.executed.amountIn) {
