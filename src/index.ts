@@ -96,30 +96,30 @@ const start = async () => {
     }
   })
 
-  try {
-    if (typeof process.env.CRON_CHANNEL === 'string') {
-      const channel = await client.channels.cache.get(process.env.CRON_CHANNEL)
-      const job = new CronJob(
-        '0 12 * * *',
-        async () => {
+  if (typeof process.env.CRON_CHANNEL === 'string') {
+    const channel = await client.channels.cache.get(process.env.CRON_CHANNEL)
+    const job = new CronJob(
+      '0 12 * * *',
+      async () => {
+        try {
           console.log('Cron job triggered')
           if (channel) {
             const embeds = await getStatsEmbed()
 
             ;(channel as any).send({ embeds })
           }
-        },
-        null,
-        true,
-        'Europe/Berlin'
-      )
+        } catch (e) {
+          console.error(e)
+        }
+      },
+      null,
+      true,
+      'Europe/Berlin'
+    )
 
-      job.start()
-    } else {
-      console.error('Missing typeof process.env.CRON_CHANNEL')
-    }
-  } catch (e) {
-    console.error(e)
+    job.start()
+  } else {
+    console.error('Missing typeof process.env.CRON_CHANNEL')
   }
 }
 

@@ -67,12 +67,13 @@ const ApiCache = {
 }
 
 const ordersQuery = gql`
-  query getOrders($skip: Int, $first: Int) {
-    orders(first: $first, skip: $skip) {
+  query getOrders($lastID: String) {
+    orders(first: 1000, where: { id_gt: $lastID }) {
       createdTimestamp
       executedTimestamp
       status
       creator
+      id
     }
   }
 `
@@ -169,11 +170,11 @@ export const getStats = async (): Promise<Stats> => {
 
   let done = false
   let first = 1000
-  let skip = 0
+  let lastID = ''
 
   const whileGenerator = function* () {
     while (!done) {
-      yield skip
+      yield lastID
     }
   }
 
@@ -184,14 +185,15 @@ export const getStats = async (): Promise<Stats> => {
       'https://api.thegraph.com/subgraphs/name/usemate/mate',
       ordersQuery,
       {
-        first,
-        skip,
+        lastID,
       }
     )
 
-    skip += first
+    lastID += first
     orders = [...orders, ...data.orders]
-    if (data.orders.length === 0) {
+    if (data.orders.length > 0) {
+      lastID = data.orders[data.orders.length - 1].id
+    } else if (data.orders.length === 0) {
       done = true
     }
   }
